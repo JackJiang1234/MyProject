@@ -23,14 +23,14 @@ typedef enum
 typedef struct _Token 
 {
 	TokenKind kind;
-	double valuel;
+	double value;
 	char *str;
 }Token;
 
 TokenParser* token_parser_create();
 void token_parser_destroy(TokenParser *thiz);
 void token_parser_set_line(TokenParser *thiz, char *line);
-void token_parser_get_token(Token *tp);
+void token_parser_get_token(TokenParser *thiz, Token *tp);
 
 #endif
 
