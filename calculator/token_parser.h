@@ -18,6 +18,8 @@ typedef enum
 	MINUS,
 	MUL,
 	DIV,
+	LEFT_PAREN,
+	RIGHT_PAREN,
 	BAD_TOKEN,
 	END_TOKEN
 }TokenKind;

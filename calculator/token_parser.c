@@ -32,7 +32,9 @@ static OperatorInfo opInfos[] =
 	{ .op = '+', .kind = PLUS },
 	{ .op = '-', .kind = MINUS },
 	{ .op = '*', .kind = MUL },
-	{ .op = '/', .kind = DIV }
+	{ .op = '/', .kind = DIV },
+	{ .op = '(', .kind = LEFT_PAREN },
+	{ .op = ')', .kind = RIGHT_PAREN }
 }; 
 
 TokenParser* token_parser_create()

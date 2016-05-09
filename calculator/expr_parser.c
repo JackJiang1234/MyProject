@@ -27,6 +27,7 @@ struct _ExprParser
  *		  | term * primary_expression
  *		  | term / primary_expression 
  *  primary_expression: number
+ *						| ( expression )
  *
  * */
 
@@ -49,20 +50,35 @@ static void expr_parser_unget_token(ExprParser* thiz, Token* pt)
 	thiz->ahead_token = *pt; 
 }
 
+static double expr_parser_expression(ExprParser* thiz);
+
 static double expr_parser_primary_expression(ExprParser* thiz)
 {
 	Token t;
+	double ret = 0.0;
 	expr_parser_get_token(thiz, &t);
+
 	if (t.kind == NUMBER)
 	{
-		return t.value;
+		ret = t.value;
+	}
+	else if (t.kind == LEFT_PAREN)
+	{
+		ret = expr_parser_expression(thiz);
+		expr_parser_get_token(thiz, &t);
+		if (t.kind != RIGHT_PAREN)
+		{
+			fprintf(stderr, "missing ')' error.\n");
+			exit(1);
+		}
 	}
 	else 
 	{
 		fprintf(stderr, "bad format, %s\n", t.str);
 		exit(1);
-		return 0;
 	}
+
+	return ret;
 }
 
 static double expr_parser_term(ExprParser* thiz)
@@ -177,8 +193,8 @@ int main(void)
 		"5+6*2",
 		"5*6*2",
 		"6-3-4",
-		"5*6/2"
-
+		"5*6/2",
+		"5*(6+2)"
 	};
 
 	for(int i = 0; i < ARRAY_LEN(arr); i++)
