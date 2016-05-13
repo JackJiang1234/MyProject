@@ -20,6 +20,20 @@ struct _TokenParser
 	int position;
 };
 
+typedef struct _OperatorInfo
+{
+	int op;
+	TokenKind kind;	
+		
+}OperatorInfo;
+
+static OperatorInfo opInfos[] = 
+{
+	{ .op = '+', .kind = PLUS },
+	{ .op = '-', .kind = MINUS },
+	{ .op = '*', .kind = MUL },
+	{ .op = '/', .kind = DIV }
+}; 
 
 TokenParser* token_parser_create()
 {
@@ -36,10 +50,6 @@ void token_parser_destroy(TokenParser *thiz)
 {
 	if(thiz != NULL)
 	{
-		if (thiz->line != NULL)
-		{
-			free(thiz->line);
-		}
 		free(thiz);
 	}
 }
@@ -47,8 +57,8 @@ void token_parser_destroy(TokenParser *thiz)
 void token_parser_set_line(TokenParser *thiz, char *line)
 {
 	return_if_fail(thiz != NULL);
-	thiz->line = malloc(strlen(line) + 1);
-	strncpy(thiz->line, line, LINE_MAX_CHARS)
+
+	thiz->line = line;
 	thiz->position = 0;
 }
 
@@ -59,7 +69,7 @@ static void token_parser_number(TokenParser *thiz, Token *pt)
 	while(1)
 	{
 		ch = thiz->line[thiz->position];
-		if (isdigit(ch) || ch == '.')
+		if (isdigit(ch) || (ch == '.'))
 		{
 			if (pt_pos < MAX_TOKEN_LEN)
 			{
@@ -70,8 +80,10 @@ static void token_parser_number(TokenParser *thiz, Token *pt)
 		}
 		else 
 		{
+			pt->str[pt_pos] = NUL;
 			sscanf(pt->str, "%lf", &pt->value);
-			thiz->position--;	
+			pt->kind = NUMBER;
+
 			return;
 		}
 	}
@@ -79,7 +91,20 @@ static void token_parser_number(TokenParser *thiz, Token *pt)
 
 static void token_parser_operator(TokenParser *thiz, Token *pt)
 {
+	int ch = thiz->line[thiz->position++];
+	for(int i = 0; i < ARRAY_LEN(opInfos); i++)
+	{
+		if(opInfos[i].op == ch)
+		{
+			pt->kind = opInfos[i].kind;
+			pt->str[0] = ch;
+			pt->value = 0.0;
 
+			return;
+		}
+	}
+
+	pt->kind = BAD_TOKEN;
 }
 
 void token_parser_get_token(TokenParser *thiz, Token *pt)
@@ -101,3 +126,53 @@ void token_parser_get_token(TokenParser *thiz, Token *pt)
 	}
 }
 
+#ifdef TOKEN_PARSER_TEST
+
+static void token_foreach(TokenParser *thiz)
+{
+
+	printf("parser:%s\n", thiz->line);
+
+	Token t;
+	token_parser_get_token(thiz, &t);
+
+	while((t.kind != END_TOKEN) && (t.kind != BAD_TOKEN))
+	{
+		if (t.kind == NUMBER)
+		{
+			printf("%f", t.value);
+		}
+		else 
+		{
+			printf("%c", t.str[0]);
+		}
+		
+		token_parser_get_token(thiz, &t);
+	}
+
+	printf("\n");
+}
+
+int main(void)
+{
+	TokenParser *thiz = token_parser_create();
+
+	token_parser_set_line(thiz, "5+6");
+	token_foreach(thiz);
+
+	token_parser_set_line(thiz, "5.6+6");
+	token_foreach(thiz);
+
+	token_parser_set_line(thiz, "5.2+6.6");
+	token_foreach(thiz);
+
+	token_parser_set_line(thiz, "5.2+6.6*100/5");
+	token_foreach(thiz);
+
+	token_parser_set_line(thiz, "5.2*6.6/100");
+	token_foreach(thiz);
+
+	token_parser_destroy(thiz);
+}
+
+#endif
