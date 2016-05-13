@@ -9,7 +9,7 @@
 #define EXPR_PARSER_H
 
 struct _ExprParser;
-typedef _ExprParser ExprParser;
+typedef struct _ExprParser ExprParser;
 
 ExprParser* expr_parser_create();
 void expr_parser_set_line(ExprParser* thiz, char* line);

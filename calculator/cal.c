@@ -6,97 +6,30 @@
 	> Created Time: Fri 13 May 2016 07:16:04 AM EDT
  ************************************************************************/
 #include<stdio.h>
-#include "token_parser.h"
+#include "expr_parser.h"
 #include "cal.h"
-
-/*
- *	expression: term
- *				| expression + term
- *				| expression - term
- *	term: primary_expression 
- *		  | term * primary_expression
- *		  | term / primary_expression 
- *  primary_expression: number
- *
- * */
-
-static double parser_primary_expression(TokenParser *thiz)
-{
-	Token t = token_parser_get_token(thiz, &t);
-	if (t.kind == NUMBER)
-	{
-		return t.value;
-	}
-	else 
-	{
-		fprintf(stderr, "bad format\n");
-		exit(1);
-		return 0;
-	}
-}
-
-static double parser_term(TokenParser *thiz)
-{
-	double v1 = parser_primary_expression(thiz);	
-
-	while(1)
-	{
-		Token t;
-		token_parser_get_token(thiz, &t);
-
-		if (t.kind == MUL || t.kind == DIV)
-		{
-			double v2 = parser_primary_expression(thiz);
-			if (t.kind == MUL)
-			{
-				v1 *= v2;
-			}
-			else 
-			{
-				v1 /= v2;
-			}
-		}
-		else 
-		{
-			//unget token
-			break;
-		}
-	}
-}
-
-static double parser_expression(TokenParser *thiz)
-{
-	double v1 = parser_term(thiz);	
-	
-	while(1)
-	{
-		Token t;	
-		token_parser_get_token(thiz, &t); 
-
-		if (t.kind == PLUS || t.kind == MINUS)
-		{
-			double v2 = parser_term(thiz);
-			if (t.kind == PLUS)
-			{
-				v1 += v2;
-			}
-			else 
-			{
-				v1 -= v2;
-			}
-		}
-		else 
-		{
-			//unget token
-			break;
-		}
-	}
-
-	return v1;
-}
+#define LINE_BUF_SIZE 100
 
 double parser_line(char *line)
 {
-	
+	ExprParser* thiz = expr_parser_create();	
+	expr_parser_set_line(thiz, line);
+	double ret = expr_parser_parse(thiz);
+	expr_parser_destroy(thiz);
+
+	return ret;
 }
+
+int main(void)
+{
+	char line[LINE_BUF_SIZE];
+
+	while(fgets(line, LINE_BUF_SIZE, stdin) != NULL)
+	{
+		printf(">>%f\n", parser_line(line));
+	}
+
+	return 0;
+}
+
 

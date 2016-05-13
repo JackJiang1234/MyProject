@@ -98,6 +98,7 @@ static void token_parser_operator(TokenParser *thiz, Token *pt)
 		{
 			pt->kind = opInfos[i].kind;
 			pt->str[0] = ch;
+			pt->str[1] = NUL;
 			pt->value = 0.0;
 
 			return;
