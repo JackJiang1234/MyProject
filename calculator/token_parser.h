@@ -17,14 +17,17 @@ typedef enum
 	PLUS,
 	MINUS,
 	MUL,
-	DIV
+	DIV,
+	BAD_TOKEN,
+	END_TOKEN
 }TokenKind;
 
+#define MAX_TOKEN_LEN 100
 typedef struct _Token 
 {
 	TokenKind kind;
 	double value;
-	char *str;
+	char str[MAX_TOKEN_LEN];
 }Token;
 
 TokenParser* token_parser_create();
